@@ -36,7 +36,7 @@ $(EXEC_FILE): $(OBJECT_FILES)
 run: $(EXEC_FILE)
 	./$(EXEC_FILE)
 
-# remove build files and the image
+# remove the build files
 clean:
 	rm -rf $(BUILD_DIR)
 
