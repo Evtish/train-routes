@@ -1,6 +1,8 @@
 #include "station.h"
 
-const double price_per_km = 4; // in rubles
+const double
+    rub_per_km = 4, // in rubles
+    km_per_second = 16.67e-3; // 60 km/h
 
 static const string station_names[] {
     "Москва",

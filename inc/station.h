@@ -11,6 +11,5 @@ typedef struct {
     const string *prev_station_name;
 } Station;
 
-extern const double price_per_km;
-
+extern const double rub_per_km, km_per_second;
 extern const unordered_map<string, Station> stations;
