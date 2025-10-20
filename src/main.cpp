@@ -37,16 +37,19 @@ int main(void) {
 
     char
         departure_time[DATETIME_SIZE],
-        arrival_time[DATETIME_SIZE];
-
+        arrival_time[DATETIME_SIZE],
+        travel_time[DHM_TIME_SIZE];
+    
     time_t t = time(NULL);
     unix_to_datetime(departure_time, t);
     unix_to_datetime(arrival_time, t + total_time_s);
+    s_to_dhm(travel_time, total_time_s);
 
     cout << "\n-------------------------\n\n";
 
     output_val(departure_time, "Время отправления");
     output_val(arrival_time, "Время прибытия");
+    output_val(travel_time, "Время в пути");
     output_val(total_dist, "Расстояние, км");
     output_val(total_cost, "Стоимость, руб");
     output_val(passenger_name, "ФИО");

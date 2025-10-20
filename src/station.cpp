@@ -15,7 +15,7 @@ const unordered_map<string, Station> stations {
     // Воронеж direction
     {station_names[1],  {480,  station_names}},
     {station_names[2],  {1200, station_names + 1}},
-    {station_names[3],  {1570, station_names + 2}},
+    {station_names[3],  {2228, station_names + 2}},
     {station_names[4],  {1950, station_names + 3}},
     {station_names[5],  {2000, station_names + 4}},
     // Екатеринбург direction

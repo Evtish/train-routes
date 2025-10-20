@@ -7,7 +7,7 @@
 using namespace std;
 
 typedef struct {
-    double dist_from_departure;
+    double dist_from_departure; // in km
     const string *prev_station_name;
 } Station;
 
