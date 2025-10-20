@@ -11,9 +11,9 @@ OBJECT_FILES := $(patsubst $(SRC_DIR)/%$(SOURCE_EXTENSION),$(BUILD_DIR)/%.o,$(SO
 DEPENDENCY_FILES := $(OBJECT_FILES:.o=.d)
 EXEC_FILE := $(BUILD_DIR)/$(PROGRAM_NAME)
 
-CC := g++
+CC := c++
 CFLAGS := -MMD -MP -std=c++11 -pedantic -Wall -Wextra -O3 -I ./$(INC_DIR)
-LDFLAGS := 
+LDFLAGS :=
 
 all: $(EXEC_FILE)
 
