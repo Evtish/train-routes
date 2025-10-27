@@ -7,12 +7,12 @@ void unix_to_datetime(char (&formatted_t)[DATETIME_SIZE], const time_t unix_time
 
 // seconds to days, hours and minutes
 void s_to_dhm(char (&dhm)[DHM_TIME_SIZE], const time_t seconds) {
+    const time_t s_in_min = 60, s_in_h = 3600, s_in_day = 86400;
     time_t days, hours, minutes, seconds_cpy = seconds;
 
-    // fix
-    minutes = seconds_cpy % 60, seconds_cpy /= 60;
-    hours = seconds_cpy % 3600, seconds_cpy /= 3600;
-    days = seconds_cpy % 86400;
+    days = seconds_cpy / s_in_day, seconds_cpy %= s_in_day;
+    hours = seconds_cpy / s_in_h, seconds_cpy %= s_in_h;
+    minutes = round((double) seconds_cpy / s_in_min);
     
     if (minutes == 60)
         hours++, minutes = 0;

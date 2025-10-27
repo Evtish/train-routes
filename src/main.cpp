@@ -47,7 +47,7 @@ int main(void) {
 
     cout << "\n-------------------------\n\n";
 
-    output_val(departure_time, "Время отправления");
+    output_val(departure_time, "Время отравления");
     output_val(arrival_time, "Время прибытия");
     output_val(travel_time, "Время в пути");
     output_val(total_dist, "Расстояние, км");
