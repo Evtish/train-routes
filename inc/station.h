@@ -12,4 +12,4 @@ typedef struct {
 } Station;
 
 extern const double rub_per_km, km_per_second;
-extern const unordered_map<string, Station> stations;
+extern const unordered_map<string, Station> all_stations;

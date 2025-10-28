@@ -10,7 +10,7 @@ static const string station_names[] {
     "Ярославль", "Кострома", "Галич", "Киров", "Пермь", "Екатеринбург"
 };
 
-const unordered_map<string, Station> stations {
+const unordered_map<string, Station> all_stations {
     {station_names[0],  {0,    nullptr}},
     // Воронеж direction
     {station_names[1],  {480,  station_names}},
