@@ -13,6 +13,29 @@ using namespace std;
 int main(void) {
     setlocale(LC_ALL, "");
 
+    // vector<vector<string>> departures {
+    //     {"0", "0", "Калуга", "стандарт"},
+    //     {"07", "45", "Калуга", "экспресс"},
+    //     {"10", "15", "Калуга", "стандарт"},
+    //     {"12", "55", "Калуга", "экспресс"},
+    //     {"16", "36", "Калуга", "стандарт"}
+    // };
+    // const char *c_departure_time = "05.11.2025";
+    // for (vector<vector<string>>::iterator it = departures.begin(); it < departures.end(); it++) {
+    //     char buffer[DATETIME_SIZE];
+    //     sprintf(buffer, "%s %s:%s:%s", c_departure_time, (*it)[0].c_str(), (*it)[1].c_str(), "00");
+    //     cout << buffer << " " << datetime_to_unix(buffer) << "\n";
+        // if (datetime_to_unix(buffer) < time(nullptr)) {
+        //     departures.erase(it);
+        // }
+    // }
+    // for (auto &v : departures) {
+    //     for (auto &s : v) {
+    //         cout << s << " ";
+    //     }
+    //     cout << "\n";
+    // }
+
     if (sqlite3_open("route.db", &route_db) != SQLITE_OK) {
         cerr << "Ошибка при открытии БД: " << sqlite3_errmsg(route_db) << endl;
         sqlite3_close(route_db);
@@ -20,8 +43,20 @@ int main(void) {
     }
     string query_res;
 
+    vector<vector<string>> unix_time;
+    db_exec_station_name(
+        unix_time, route_db,
+        "SELECT hours, minutes\
+        FROM schedule\
+        WHERE direction_name = ? AND term_station_id >= ?;",
+        2, c_direction_name, c_dest_station_id
+    );
+
     Ticket ticket;
-    string dest_station_name, dest_station_id, direction_name; // TODO: -> const char *
+    string departure_time, dest_station_name, dest_station_id, direction_name; // TODO: -> const char *
+
+    ticket_input(departure_time, "Дата отправления (дд.мм.гггг)");
+    const char *c_departure_time = departure_time.c_str();
 
     ticket_input(dest_station_name, "Куда");
     const char *c_dest_station_name = dest_station_name.c_str();
@@ -57,6 +92,16 @@ int main(void) {
         WHERE direction_name = ? AND term_station_id >= ?;",
         2, c_direction_name, c_dest_station_id
     );
+    // cout << departures.size() << "\n";
+    for (vector<vector<string>>::iterator it = departures.begin(); it < departures.end(); it++) {
+        char buffer[DATETIME_SIZE];
+        sprintf(buffer, "%s %s:%s:%s", c_departure_time, (*it)[0].c_str(), (*it)[1].c_str(), "00");
+        // cout << buffer << " " << datetime_to_unix(buffer) - time(nullptr) << "\n";
+        if (datetime_to_unix(buffer) < time(nullptr)) {
+            departures.erase(it);
+        }
+    }
+
     unsigned departure_idx = 0;
     ticket_choose_option(departure_idx, departures, "Выберите отправление");
 
@@ -77,12 +122,12 @@ int main(void) {
     // ticket_choose_option(ticket.train_seat.railroad_car_type, ticket.cost, railroad_car_ratio, "Тип пассажирского места");
 
     char
-        departure_time[DATETIME_SIZE],
+        // departure_time[DATETIME_SIZE],
         arrival_time[DATETIME_SIZE],
         formatted_travel_time[DHM_TIME_SIZE];
     
-    time_t t = time(nullptr);
-    unix_to_datetime(departure_time, t);
+    const time_t t = time(nullptr);
+    // unix_to_datetime(departure_time, t);
     unix_to_datetime(arrival_time, t + ticket.travel_time);
     s_to_dhm(formatted_travel_time, ticket.travel_time);
 

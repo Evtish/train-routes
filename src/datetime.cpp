@@ -1,8 +1,17 @@
 #include "datetime.h"
 
-void unix_to_datetime(char (&formatted_t)[DATETIME_SIZE], const time_t unix_time) {
+void unix_to_datetime(char (&formatted_t)[DATETIME_SIZE], const time_t &unix_time) {
     tm *tmp = localtime(&unix_time);
     strftime(formatted_t, DATETIME_SIZE, "%d %b %Y %H:%M", tmp);
+}
+
+// https://stackoverflow.com/questions/1002542/how-to-convert-datetime-to-unix-timestamp-in-c#1002631
+time_t datetime_to_unix(const char *timestamp) {
+    struct tm tm;
+    if (strptime(timestamp, "%d.%m.%Y %H:%M:%S", &tm) != NULL)
+        return mktime(&tm);
+    else
+        return 0;
 }
 
 // seconds to days, hours and minutes
