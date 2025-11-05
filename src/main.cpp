@@ -1,7 +1,4 @@
 #include <iostream>
-// #include <algorithm>
-#include <codecvt>
-#include <locale>
 #include <vector>
 #include <ctime>
 
@@ -21,74 +18,54 @@ int main(void) {
         sqlite3_close(route_db);
         exit(1);
     }
-
-    // char *db_errmsg = nullptr;
-    // char stmt[256];
     string query_res;
-    // db_exec_station_name(
-    //     query_res, route_db, "Суходрев", "Суходрев",
-    //     "SELECT name FROM station WHERE direction_name = (SELECT direction_name FROM station WHERE name = ?) AND id <= (SELECT id FROM station WHERE name = ?);"
-    // );
-    // for (auto &s : query_res)
-    //     cout << s << "\n";
 
     Ticket ticket;
-    string dest_station_name;
+    string dest_station_name, dest_station_id, direction_name; // TODO: -> const char *
 
     ticket_input(dest_station_name, "Куда");
     const char *c_dest_station_name = dest_station_name.c_str();
 
     db_exec_station_name(
-        query_res, route_db,
+        dest_station_id, route_db,
         "SELECT id\
         FROM station\
         WHERE name = ?;",
         c_dest_station_name
     );
-    // sprintf(stmt, "SELECT id FROM station WHERE name = '%s';", c_dest_station_name);
-    // sqlite3_exec(route_db, stmt, db_assign_to_str, &query_res, &db_errmsg);
-    // db_print_error(db_errmsg);
 
-    if (query_res.empty()) {
+    if (dest_station_id.empty()) {
         cerr << "Ошибка: станция не найдена\n" << endl;
         exit(1);
     }
-    
-    db_exec_station_name(
-        ticket.stations, route_db,
-        "SELECT name\
-        FROM station\
-        WHERE direction_name = (\
-            SELECT direction_name\
-            FROM station\
-            WHERE name = ?\
-        ) AND\
-        id <= (\
-            SELECT id\
-            FROM station\
-            WHERE name = ?\
-        )\
-        ORDER BY id DESC;",
-        2, c_dest_station_name, c_dest_station_name
-    );
-    // sprintf(
-    //     stmt,
-    //     "SELECT name FROM station WHERE direction_name = (SELECT direction_name FROM station WHERE name = '%s') AND id <= (SELECT id FROM station WHERE name = '%s');",
-    //     c_dest_station_name, c_dest_station_name
-    // );
-    // cout << stmt << "\n";
-    // sqlite3_exec(route_db, stmt, db_assign_to_vec, &ticket.stations, &db_errmsg);
-    // db_print_error(db_errmsg);
+    const char *c_dest_station_id = dest_station_id.c_str();
 
-    // sprintf(stmt, "SELECT dist_from_departure FROM station WHERE name = '%s';", c_dest_station_name);
-    // sqlite3_exec(route_db, stmt, db_assign_to_str, &query_res, &db_errmsg);
-    // db_print_error(db_errmsg);
+    db_exec_station_name(
+        direction_name, route_db,
+        "SELECT direction_name\
+        FROM station\
+        WHERE id = ?;",
+        c_dest_station_id
+    );
+    const char *c_direction_name = direction_name.c_str();
+
+    vector<vector<string>> departures;
+    db_exec_station_name(
+        departures, route_db,
+        "SELECT hours, minutes, term_station_name, train_type\
+        FROM schedule\
+        WHERE direction_name = ? AND term_station_id >= ?;",
+        2, c_direction_name, c_dest_station_id
+    );
+    unsigned departure_idx = 0;
+    ticket_choose_option(departure_idx, departures, "Выберите отправление");
+
     db_exec_station_name(
         query_res, route_db,
         "SELECT dist_from_departure\
         FROM station\
-        WHERE name = ?;",
-        c_dest_station_name
+        WHERE id = ?;",
+        c_dest_station_id
     );
     ticket.distance = stoi(query_res);
     ticket.cost = ticket.distance * rub_per_km;
@@ -96,8 +73,8 @@ int main(void) {
 
     ticket_input(ticket.passenger.full_name, "ФИО");
     ticket_input(ticket.passenger.id_card, "Серия и номер паспорта (слитно)");
-    ticket_choose_option(ticket.train_seat.train_type, ticket.cost, train_ratio, "Тип поезда");
-    ticket_choose_option(ticket.train_seat.railroad_car_type, ticket.cost, railroad_car_ratio, "Тип пассажирского места");
+    // ticket_choose_option(ticket.train_seat.train_type, ticket.cost, train_ratio, "Тип поезда");
+    // ticket_choose_option(ticket.train_seat.railroad_car_type, ticket.cost, railroad_car_ratio, "Тип пассажирского места");
 
     char
         departure_time[DATETIME_SIZE],
@@ -108,6 +85,15 @@ int main(void) {
     unix_to_datetime(departure_time, t);
     unix_to_datetime(arrival_time, t + ticket.travel_time);
     s_to_dhm(formatted_travel_time, ticket.travel_time);
+
+    db_exec_station_name(
+        ticket.stations, route_db,
+        "SELECT name\
+        FROM station\
+        WHERE direction_name = ? AND id <= ?\
+        ORDER BY id DESC;",
+        2, c_direction_name, c_dest_station_id
+    );
 
     ticket_print(ticket.passenger.full_name, "ФИО");
     ticket_print(ticket.passenger.id_card, "Серия и номер паспорта");

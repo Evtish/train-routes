@@ -39,10 +39,31 @@ void db_exec_station_name(vector<string> &res, sqlite3 * &db, const char *query,
         sqlite3_bind_text(stmt, i + 1, va_arg(text_bind, const char *), -1, SQLITE_STATIC);
     va_end(text_bind);
 
+    while (sqlite3_step(stmt) == SQLITE_ROW)
+        res.push_back(reinterpret_cast<const char *>(sqlite3_column_text(stmt, 0)));
+
+    sqlite3_finalize(stmt);
+}
+void db_exec_station_name(vector<vector<string>> &res, sqlite3 * &db, const char *query, const int amount_of_binds, ...) {
+    sqlite3_stmt *stmt;
+    if (sqlite3_prepare_v2(db, query, -1, &stmt, nullptr) != SQLITE_OK) {
+        cerr << "Ошибка подготовки запроса: " << sqlite3_errmsg(db) << endl;
+        sqlite3_close(db);
+        exit(1);
+    }
+
+    va_list text_bind;
+    va_start(text_bind, amount_of_binds);
+    for (int i = 0; i < amount_of_binds; i++)
+        sqlite3_bind_text(stmt, i + 1, va_arg(text_bind, const char *), -1, SQLITE_STATIC);
+    va_end(text_bind);
+
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         int col_count = sqlite3_column_count(stmt);
+        vector<string> line;
         for (int i = 0; i < col_count; i++)
-            res.push_back(reinterpret_cast<const char *>(sqlite3_column_text(stmt, 0)));
+            line.push_back(reinterpret_cast<const char *>(sqlite3_column_text(stmt, i)));
+        res.push_back(line);
     }
 
     sqlite3_finalize(stmt);
