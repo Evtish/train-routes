@@ -10,14 +10,14 @@ sqlite3 *route_db;
 //         }
 // }
 
-void db_exec_station_name(string &res, sqlite3 * &db, const string &station_name, const char *query) {
+void db_exec_station_name(string &res, sqlite3 * &db, const char *query, const char *station_name) {
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, query, -1, &stmt, nullptr) != SQLITE_OK) {
         cerr << "Ошибка подготовки запроса: " << sqlite3_errmsg(db) << endl;
         sqlite3_close(db);
         exit(1);
     }
-    sqlite3_bind_text(stmt, 1, station_name.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 1, station_name, -1, SQLITE_STATIC);
 
     if (sqlite3_step(stmt) == SQLITE_ROW) {
         res = reinterpret_cast<const char *>(sqlite3_column_text(stmt, 0));
@@ -25,15 +25,19 @@ void db_exec_station_name(string &res, sqlite3 * &db, const string &station_name
 
     sqlite3_finalize(stmt);
 }
-void db_exec_station_name(vector<string> &res, sqlite3 * &db, const string &station_name1, const string &station_name2, const char *query) {
+void db_exec_station_name(vector<string> &res, sqlite3 * &db, const char *query, const int amount_of_binds, ...) {
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, query, -1, &stmt, nullptr) != SQLITE_OK) {
         cerr << "Ошибка подготовки запроса: " << sqlite3_errmsg(db) << endl;
         sqlite3_close(db);
         exit(1);
     }
-    sqlite3_bind_text(stmt, 1, station_name1.c_str(), -1, SQLITE_STATIC);
-    sqlite3_bind_text(stmt, 2, station_name2.c_str(), -1, SQLITE_STATIC);
+
+    va_list text_bind;
+    va_start(text_bind, amount_of_binds);
+    for (int i = 0; i < amount_of_binds; i++)
+        sqlite3_bind_text(stmt, i + 1, va_arg(text_bind, const char *), -1, SQLITE_STATIC);
+    va_end(text_bind);
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
         int col_count = sqlite3_column_count(stmt);
@@ -52,17 +56,17 @@ void db_exec_station_name(vector<string> &res, sqlite3 * &db, const string &stat
 //     }
 // }
 
-int db_print_stmt(void *, int, char **stmt_res, char **) {
-    printf("%s\n", *stmt_res);
-    return 0;
-}
+// int db_print_stmt(void *, int, char **stmt_res, char **) {
+//     printf("%s\n", *stmt_res);
+//     return 0;
+// }
 
-int db_assign_to_str(void *p_str, int, char **stmt_res, char **) {
-    *(string *) p_str = *stmt_res;
-    return 0;
-}
+// int db_assign_to_str(void *p_str, int, char **stmt_res, char **) {
+//     *(string *) p_str = *stmt_res;
+//     return 0;
+// }
 
-int db_assign_to_vec(void *p_vec, int, char **stmt_res, char **) {
-    ((vector<string> *) p_vec)->push_back(*stmt_res);
-    return 0;
-}
+// int db_assign_to_vec(void *p_vec, int, char **stmt_res, char **) {
+//     ((vector<string> *) p_vec)->push_back(*stmt_res);
+//     return 0;
+// }

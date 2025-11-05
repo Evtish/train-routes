@@ -36,8 +36,15 @@ int main(void) {
     string dest_station_name;
 
     ticket_input(dest_station_name, "Куда");
+    const char *c_dest_station_name = dest_station_name.c_str();
 
-    db_exec_station_name(query_res, route_db, dest_station_name, "SELECT id FROM station WHERE name = ?;");
+    db_exec_station_name(
+        query_res, route_db,
+        "SELECT id\
+        FROM station\
+        WHERE name = ?;",
+        c_dest_station_name
+    );
     // sprintf(stmt, "SELECT id FROM station WHERE name = '%s';", c_dest_station_name);
     // sqlite3_exec(route_db, stmt, db_assign_to_str, &query_res, &db_errmsg);
     // db_print_error(db_errmsg);
@@ -48,8 +55,21 @@ int main(void) {
     }
     
     db_exec_station_name(
-        ticket.stations, route_db, dest_station_name, dest_station_name,
-        "SELECT name FROM station WHERE direction_name = (SELECT direction_name FROM station WHERE name = ?) AND id <= (SELECT id FROM station WHERE name = ?);"
+        ticket.stations, route_db,
+        "SELECT name\
+        FROM station\
+        WHERE direction_name = (\
+            SELECT direction_name\
+            FROM station\
+            WHERE name = ?\
+        ) AND\
+        id <= (\
+            SELECT id\
+            FROM station\
+            WHERE name = ?\
+        )\
+        ORDER BY id DESC;",
+        2, c_dest_station_name, c_dest_station_name
     );
     // sprintf(
     //     stmt,
@@ -63,7 +83,13 @@ int main(void) {
     // sprintf(stmt, "SELECT dist_from_departure FROM station WHERE name = '%s';", c_dest_station_name);
     // sqlite3_exec(route_db, stmt, db_assign_to_str, &query_res, &db_errmsg);
     // db_print_error(db_errmsg);
-    db_exec_station_name(query_res, route_db, dest_station_name, "SELECT dist_from_departure FROM station WHERE name = ?;");
+    db_exec_station_name(
+        query_res, route_db,
+        "SELECT dist_from_departure\
+        FROM station\
+        WHERE name = ?;",
+        c_dest_station_name
+    );
     ticket.distance = stoi(query_res);
     ticket.cost = ticket.distance * rub_per_km;
     ticket.travel_time = ticket.distance / km_per_second;
