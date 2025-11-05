@@ -13,7 +13,7 @@ EXEC_FILE := $(BUILD_DIR)/$(PROGRAM_NAME)
 
 CC := c++
 CFLAGS := -MMD -MP -std=c++11 -pedantic -Wall -Wextra -O3 -I ./$(INC_DIR)
-LDFLAGS :=
+LDFLAGS := -lsqlite3
 
 all: $(EXEC_FILE)
 

@@ -11,15 +11,15 @@ using namespace std;
 
 typedef struct {
     Passenger passenger;
-    vector<const string*> stations;
+    vector<string> stations;
     TrainSeat train_seat;
-    double distance; // in km
+    unsigned distance; // in km
     double cost; // in rubles
     time_t travel_time; // in seconds
 } Ticket;
 
-void ticket_input(string &str, const string &message);
+void ticket_input(string &val, const string &message);
 void ticket_choose_option(string &key, double &val, const map_ratio &options, const string &message);
 void ticket_print(const string &val, const string &message);
 void ticket_print(const double &val, const string &message);
-void ticket_print_stations(const vector<const string*> &reversed_stations);
+void ticket_print_stations(const vector<string> &reversed_stations);

@@ -32,10 +32,10 @@ void ticket_print(const double &val, const string &message) {
 }
 
 // in reversed order
-void ticket_print_stations(const vector<const string*> &stations) {
+void ticket_print_stations(const vector<string> &stations) {
     cout << "Станции: ";
     for (size_t i = stations.size(); i > 0; i--) {
-        cout << *stations[i - 1];
+        cout << stations[i - 1];
         if (i > 1)
             cout << ", ";
     }
