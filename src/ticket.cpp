@@ -1,43 +1,42 @@
 #include "ticket.h"
 
-void delete_above_lines(unsigned n) {
-    cout << "\x1B[" << n << "A\x1B[0J\r"; // moves cursor up n lines, erase from cursor until end of screen, return the carriage
-}
+const double
+    rub_per_km = 4, // in rubles
+    km_per_second = 16.67e-3; // 60 km/h
 
-void ticket_input(string &val, const string &message) {
-    cout << message << ": ";
-    getline(cin, val);
-    delete_above_lines(1);
-}
+// long distance raiload car names
+const vector<string> ld_railroad_car_names {
+    "плацкарт",
+    "купе",
+    "СВ"
+};
 
-void ticket_choose_option(string &key, double &val, const map_ratio &options, const string &message) {
-    string input;
+const unordered_map<TrainType, string> train_name_ratio {
+    {TRAIN_STANDARD, "стандарт"},
+    {TRAIN_EXPRESS, "экспресс"},
+    {TRAIN_LONG_DISTANCE, "дальний"}
+};
+const unordered_map<RailroadCarType, string> railroad_car_name_ratio {
+    {CAR_STANDARD, "сидячее"},
+    {CAR_PLACARD, ld_railroad_car_names[0]},
+    {CAR_COUPE, ld_railroad_car_names[1]},
+    {CAR_SLEEPER, ld_railroad_car_names[2]}
+};
 
-    for (map_ratio::const_iterator iter = options.begin(); iter != options.end(); iter++)
-        cout << "- " << iter->first << "\n";
-    cout << message << ": ";
-    getline(cin, input);
+const unordered_map<TrainType, double> train_speed_ratio {
+    {TRAIN_STANDARD, 1.0},
+    {TRAIN_EXPRESS, 1.25},
+    {TRAIN_LONG_DISTANCE, 1.0}
+};
 
-    val *= options.at(input);
-    key = input;
-
-    delete_above_lines(options.size() + 1);
-}
-
-void ticket_print(const string &val, const string &message) {
-    cout << message << ": " << val << "\n";
-}
-void ticket_print(const double &val, const string &message) {
-    cout << message << ": " << val << "\n";
-}
-
-// in reversed order
-void ticket_print_stations(const vector<const string*> &stations) {
-    cout << "Станции: ";
-    for (size_t i = stations.size(); i > 0; i--) {
-        cout << *stations[i - 1];
-        if (i > 1)
-            cout << ", ";
-    }
-    cout << "\n";
-}
+const unordered_map<TrainType, double> train_cost_ratio {
+    {TRAIN_STANDARD, 1.0},
+    {TRAIN_EXPRESS, 1.7},
+    {TRAIN_LONG_DISTANCE, 0.7}
+};
+const unordered_map<RailroadCarType, double> railroad_car_cost_ratio {
+    {CAR_STANDARD, 1.0},
+    {CAR_PLACARD, 1.0},
+    {CAR_COUPE, 1.6},
+    {CAR_SLEEPER, 5.2}
+};

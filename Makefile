@@ -12,8 +12,8 @@ DEPENDENCY_FILES := $(OBJECT_FILES:.o=.d)
 EXEC_FILE := $(BUILD_DIR)/$(PROGRAM_NAME)
 
 CC := c++
-CFLAGS := -MMD -MP -std=c++11 -pedantic -Wall -Wextra -O3 -I ./$(INC_DIR)
-LDFLAGS :=
+CFLAGS := -MMD -MP -std=c++20 -pedantic -Wall -Wextra -O3 -I ./$(INC_DIR)
+LDFLAGS := -lsqlite3
 
 all: $(EXEC_FILE)
 
