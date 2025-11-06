@@ -18,6 +18,7 @@ time_t date_to_unix(const char *timestamp) {
         return 0;
 }
 
+// seconds to days, hours and minutes
 string s_to_dhm(const time_t seconds) {
     char dhm[DHM_TIME_SIZE];
     const time_t s_in_min = 60, s_in_h = 3600, s_in_day = 86400;

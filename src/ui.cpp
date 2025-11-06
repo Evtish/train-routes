@@ -21,7 +21,7 @@ unsigned ui_choose_option(const vector<string> &options, const string &message) 
 
     unsigned index = stoi(input) - 1;
 
-    delete_above_lines(amount_of_options);
+    delete_above_lines(amount_of_options + 1);
 
     return index;
 }

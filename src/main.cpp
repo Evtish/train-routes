@@ -36,7 +36,8 @@ int main(void) {
     
     vector<vector<string>> schedule_records;
     db_get_schedule_records(schedule_records, direction_name, dest_station_id);
-
+    
+    // TODO: make choosing on-going, wo/ creating the departures vector
     vector<Departure> departures;
     for (vector<string> &rec : schedule_records) {
         time_t departure_datetime = date_to_unix(departure_date.c_str()) + stol(rec[1]);
