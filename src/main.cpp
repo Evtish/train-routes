@@ -1,6 +1,5 @@
 #include <iostream>
 #include <vector>
-#include <ctime>
 
 #include "ticket.h"
 #include "datetime.h"
@@ -16,26 +15,24 @@ int main(void) {
 
     Ticket ticket;
 
-    ui_input(ticket.passenger.full_name, "ФИО");
-
-    string departure_date;
-    ui_input(departure_date, "Дата отправления (дд.мм.гггг)");
-
     string dest_station_name;
     ui_input(dest_station_name, "Куда");
 
-    char dest_station_id[DB_RES_BUFFER_SIZE] = "\0";
+    char dest_station_id[DB_RES_SIZE] = "\0";
     db_get_station_id(dest_station_id, dest_station_name.c_str());
     if (dest_station_id[0] == '\0') {
-        cerr << "Ошибка: станция не найдена\n" << endl;
+        cerr << "Ошибка: станция не найдена" << endl;
         exit(1);
     }
 
-    char direction_name[DB_RES_BUFFER_SIZE];
+    char direction_name[DB_RES_SIZE];
     db_get_direction_name(direction_name, dest_station_id);
     
     vector<vector<string>> schedule_records;
     db_get_schedule_records(schedule_records, direction_name, dest_station_id);
+
+    string departure_date;
+    ui_input(departure_date, "Дата отправления (дд.мм.гггг)");
     
     // TODO: make choosing on-going, wo/ creating the departures vector
     vector<Departure> departures;
@@ -64,14 +61,10 @@ int main(void) {
     ticket.cost = ticket.distance * rub_per_km * train_cost_ratio.at(ticket.departure.train_type) * railroad_car_cost_ratio.at(ticket.railroad_car_type);
     ticket.travel_datetime = ticket.distance / km_per_second / train_speed_ratio.at(ticket.departure.train_type);
 
-    // TODO: fix
-    cout << "Серия и номер паспорта (слитно): ";
-    cin >> ticket.passenger.id_card;
-    delete_above_lines(1);
-    // ui_input(ticket.passenger.id_card, "Серия и номер паспорта (слитно)");
+    ui_input(ticket.passenger.full_name, "ФИО");
+    ui_input(ticket.passenger.id_card, "Серия и номер паспорта (слитно)");
 
-    char c_train_type[2] = { static_cast<char>(ticket.departure.train_type + '0'), '\0' };
-    db_get_stations(ticket.stations, direction_name, dest_station_id, c_train_type);
+    db_get_stations(ticket.stations, direction_name, dest_station_id, to_string(ticket.departure.train_type == TRAIN_STANDARD).c_str());
 
     ui_print_ticket(ticket);
 

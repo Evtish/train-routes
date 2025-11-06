@@ -35,8 +35,8 @@ struct Ticket {
     vector<string> stations;
     Passenger passenger;
     Departure departure;
-    unsigned distance; // in km
     double cost; // in rubles
+    unsigned distance; // in km
     time_t travel_datetime; // in seconds
     RailroadCarType railroad_car_type;
 };

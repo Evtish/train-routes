@@ -3,25 +3,18 @@
 #include <sqlite3.h>
 #include <cstring>
 #include <cstdarg>
-#include <cstdio>
 
 #include <string>
 #include <vector>
 #include <iostream>
 
-#include "ticket.h"
-
-#define DB_RES_BUFFER_SIZE 128
+#define DB_RES_SIZE 128
 
 using namespace std;
 
 extern sqlite3 *route_db;
 
 void db_open(const char * filename, sqlite3 * &db);
-void db_exec(char *res, sqlite3 * &db, const char *query, const char *station_name);
-void db_exec(vector<string> &res, sqlite3 * &db, const char *query, const int amount_of_binds, ...);
-void db_exec(vector<vector<string>> &res, sqlite3 * &db, const char *query, const int amount_of_binds, ...);
-
 void db_get_station_id(char *station_id, const char *station_name);
 void db_get_direction_name(char *direction_name, const char *station_id);
 void db_get_schedule_records(vector<vector<string>> &schedule_record, const char *direction_name, const char *station_id);

@@ -20,7 +20,7 @@ void db_exec(char *res, sqlite3 * &db, const char *query, const char *station_na
     sqlite3_bind_text(stmt, 1, station_name, -1, SQLITE_STATIC);
 
     if (sqlite3_step(stmt) == SQLITE_ROW) {
-        memcpy(res, sqlite3_column_text(stmt, 0), DB_RES_BUFFER_SIZE);
+        memcpy(res, sqlite3_column_text(stmt, 0), DB_RES_SIZE);
     }
 
     sqlite3_finalize(stmt);
@@ -102,7 +102,7 @@ void db_get_schedule_records(vector<vector<string>> &schedule_record, const char
 }
 
 void db_get_distance(unsigned &dist, const char *station_id) {
-    char query_res[DB_RES_BUFFER_SIZE];
+    char query_res[DB_RES_SIZE];
     db_exec(
         query_res, route_db,
         "SELECT dist_from_departure\
@@ -118,7 +118,7 @@ void db_get_stations(vector<string> &stations, const char *direction_name, const
         stations, route_db,
         "SELECT name\
         FROM station\
-        WHERE (direction_name = ? OR direction_name IS NULL) AND id <= ? AND standard_train_only = (NOT ?);",
+        WHERE (direction_name = ? OR direction_name IS NULL) AND id <= ? AND (? OR standard_train_only = 0);",
         3, direction_name, station_id, train_type
     );
 }

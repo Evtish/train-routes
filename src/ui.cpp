@@ -4,29 +4,34 @@ void delete_above_lines(unsigned n) {
     cout << "\x1B[" << n << "A\x1B[0J\r"; // moves cursor up n lines, erase from cursor until end of screen, return the carriage
 }
 
-void ui_input(string &val, const string &message) {
+void ui_input(string &s, const string &message) {
     cout << message << ": ";
-    getline(cin, val);
+    getline(cin, s);
     delete_above_lines(1);
 }
+// void ui_input(char *s, const int &size_limit, const string &message) {
+//     cout << message << ": ";
+//     fgets(s, size_limit, stdin);
+//     delete_above_lines(1);
+// }
 
 unsigned ui_choose_option(const vector<string> &options, const string &message) {
-    string input;
+    string s;
     size_t amount_of_options = options.size();
 
     for (size_t i = 0; i < amount_of_options; i++)
         cout << i + 1 << ". " << options[i] << "\n";
     cout << message << ": ";
-    cin >> input;
+    getline(cin, s);
 
-    unsigned index = stoi(input) - 1;
+    unsigned index = stoi(s) - 1;
 
     delete_above_lines(amount_of_options + 1);
 
     return index;
 }
 unsigned ui_choose_option(const vector<Departure> &options, const string &message) {
-    string input;
+    string s;
     size_t amount_of_options = options.size();
 
     cout << "   отправление       конечная          тип поезда\n";
@@ -35,20 +40,20 @@ unsigned ui_choose_option(const vector<Departure> &options, const string &messag
         cout << i + 1 << ". " << unix_to_datetime(dep.departure_datetime) << " " << dep.term_station_name << "      " << train_name_ratio.at(dep.train_type) << "\n";
     }
     cout << message << ": ";
-    cin >> input;
+    getline(cin, s);
 
-    unsigned index = stoi(input) - 1;
+    unsigned index = stoi(s) - 1;
 
     delete_above_lines(amount_of_options + 2);
 
     return index;
 }
 
-void ui_print(const string &val, const string &message) {
-    cout << message << ": " << val << "\n";
+void ui_print(const string &s, const string &message) {
+    cout << message << ": " << s << "\n";
 }
-void ui_print(const double &val, const string &message) {
-    cout << message << ": " << val << "\n";
+void ui_print(const double &s, const string &message) {
+    cout << message << ": " << s << "\n";
 }
 
 void ui_print_stations(const vector<string> &stations) {

@@ -4,12 +4,10 @@
 #include <cmath>
 #include <cstdio>
 
+#include <iostream>
 #include <string>
 
 using namespace std;
-
-#define DATETIME_SIZE 20
-#define DHM_TIME_SIZE 25
 
 extern const time_t datetime_offset;
 
