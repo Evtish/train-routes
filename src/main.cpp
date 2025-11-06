@@ -6,6 +6,7 @@
 #include "ticket.h"
 #include "datetime.h"
 #include "train.h"
+#include "ui.h"
 #include "database.h"
 
 using namespace std;
@@ -13,143 +14,86 @@ using namespace std;
 int main(void) {
     setlocale(LC_ALL, "");
 
-    // vector<vector<string>> departures {
-    //     {"0", "0", "Калуга", "стандарт"},
-    //     {"07", "45", "Калуга", "экспресс"},
-    //     {"10", "15", "Калуга", "стандарт"},
-    //     {"12", "55", "Калуга", "экспресс"},
-    //     {"16", "36", "Калуга", "стандарт"}
-    // };
-    // const char *c_departure_time = "05.11.2025";
-    // for (vector<vector<string>>::iterator it = departures.begin(); it < departures.end(); it++) {
-    //     char buffer[DATETIME_SIZE];
-    //     sprintf(buffer, "%s %s:%s:%s", c_departure_time, (*it)[0].c_str(), (*it)[1].c_str(), "00");
-    //     cout << buffer << " " << datetime_to_unix(buffer) << "\n";
-        // if (datetime_to_unix(buffer) < time(nullptr)) {
-        //     departures.erase(it);
-        // }
-    // }
-    // for (auto &v : departures) {
-    //     for (auto &s : v) {
-    //         cout << s << " ";
-    //     }
-    //     cout << "\n";
-    // }
+    db_open("route.db", route_db);
 
-    if (sqlite3_open("route.db", &route_db) != SQLITE_OK) {
-        cerr << "Ошибка при открытии БД: " << sqlite3_errmsg(route_db) << endl;
-        sqlite3_close(route_db);
-        exit(1);
-    }
-    string query_res;
-
-    vector<vector<string>> unix_time;
-    db_exec_station_name(
-        unix_time, route_db,
-        "SELECT hours, minutes\
-        FROM schedule\
-        WHERE direction_name = ? AND term_station_id >= ?;",
-        2, c_direction_name, c_dest_station_id
-    );
+    // vector<vector<string>> tmp;
+    // db_exec(
+    //     tmp, route_db,
+    //     "SELECT hours, minutes\
+    //     FROM schedule",
+    //     0
+    // );
+    // for (auto &hm : tmp) {
+    //     time_t h = stoul(hm[0]), m = stoul(hm[1]);
+    //     cout << h * 3600 + m * 60 << "\n";
+    // }
 
     Ticket ticket;
-    string departure_time, dest_station_name, dest_station_id, direction_name; // TODO: -> const char *
 
-    ticket_input(departure_time, "Дата отправления (дд.мм.гггг)");
-    const char *c_departure_time = departure_time.c_str();
+    string departure_date = ui_input("Дата отправления (дд.мм.гггг)");
+    // time_t unix_departure_date = date_to_unix(departure_date.c_str());
+    // const char *c_departure_date = departure_date.c_str();
 
-    ticket_input(dest_station_name, "Куда");
-    const char *c_dest_station_name = dest_station_name.c_str();
+    string dest_station_name = ui_input("Куда");
 
-    db_exec_station_name(
-        dest_station_id, route_db,
-        "SELECT id\
-        FROM station\
-        WHERE name = ?;",
-        c_dest_station_name
-    );
-
-    if (dest_station_id.empty()) {
+    char dest_station_id[DB_RES_BUFFER_SIZE] = "\0";
+    db_get_station_id(dest_station_id, dest_station_name.c_str());
+    if (dest_station_id[0] == '\0') {
         cerr << "Ошибка: станция не найдена\n" << endl;
         exit(1);
     }
-    const char *c_dest_station_id = dest_station_id.c_str();
 
-    db_exec_station_name(
-        direction_name, route_db,
-        "SELECT direction_name\
-        FROM station\
-        WHERE id = ?;",
-        c_dest_station_id
-    );
-    const char *c_direction_name = direction_name.c_str();
+    char direction_name[DB_RES_BUFFER_SIZE];
+    db_get_direction_name(direction_name, dest_station_id);
+    
+    vector<vector<string>> schedule_records;
+    db_get_schedule_records(schedule_records, direction_name, dest_station_id);
 
-    vector<vector<string>> departures;
-    db_exec_station_name(
-        departures, route_db,
-        "SELECT hours, minutes, term_station_name, train_type\
-        FROM schedule\
-        WHERE direction_name = ? AND term_station_id >= ?;",
-        2, c_direction_name, c_dest_station_id
-    );
-    // cout << departures.size() << "\n";
-    for (vector<vector<string>>::iterator it = departures.begin(); it < departures.end(); it++) {
-        char buffer[DATETIME_SIZE];
-        sprintf(buffer, "%s %s:%s:%s", c_departure_time, (*it)[0].c_str(), (*it)[1].c_str(), "00");
-        // cout << buffer << " " << datetime_to_unix(buffer) - time(nullptr) << "\n";
-        if (datetime_to_unix(buffer) < time(nullptr)) {
-            departures.erase(it);
+    vector<Departure> departures;
+    for (vector<string> &rec : schedule_records) {
+        time_t departure_datetime = date_to_unix(departure_date.c_str()) + stol(rec[1]);
+        if (departure_datetime - time(nullptr) >= datetime_offset) {
+            departures.push_back(Departure{
+                .term_station_name = rec[2],
+                .departure_datetime = departure_datetime,
+                .train_type = static_cast<TrainType>(stoi(rec[3])),
+                .id = static_cast<unsigned>(stoi(rec[0]))
+            });
         }
     }
 
-    unsigned departure_idx = 0;
-    ticket_choose_option(departure_idx, departures, "Выберите отправление");
+    unsigned departure_idx = ui_choose_option(departures, "Выберите отправление");
+    Departure departure = departures[departure_idx];
 
-    db_exec_station_name(
-        query_res, route_db,
-        "SELECT dist_from_departure\
-        FROM station\
-        WHERE id = ?;",
-        c_dest_station_id
-    );
-    ticket.distance = stoi(query_res);
+    
+    if (departure.train_type == TRAIN_LONG_DISTANCE) {
+
+    }
+    
+    ticket.distance = 0;
+    db_get_distance(ticket.distance, dest_station_id);
     ticket.cost = ticket.distance * rub_per_km;
     ticket.travel_time = ticket.distance / km_per_second;
 
-    ticket_input(ticket.passenger.full_name, "ФИО");
-    ticket_input(ticket.passenger.id_card, "Серия и номер паспорта (слитно)");
-    // ticket_choose_option(ticket.train_seat.train_type, ticket.cost, train_ratio, "Тип поезда");
-    // ticket_choose_option(ticket.train_seat.railroad_car_type, ticket.cost, railroad_car_ratio, "Тип пассажирского места");
+    ticket.passenger.full_name = ui_input("ФИО");
+    ticket.passenger.id_card = ui_input("Серия и номер паспорта (слитно)");
+    // ui_choose_option(ticket.train_seat.train_type, ticket.cost, train_ratio, "Тип поезда");
+    // ui_choose_option(ticket.train_seat.railroad_car_type, ticket.cost, railroad_car_ratio, "Тип пассажирского места");
 
-    char
-        // departure_time[DATETIME_SIZE],
-        arrival_time[DATETIME_SIZE],
-        formatted_travel_time[DHM_TIME_SIZE];
-    
-    const time_t t = time(nullptr);
-    // unix_to_datetime(departure_time, t);
-    unix_to_datetime(arrival_time, t + ticket.travel_time);
-    s_to_dhm(formatted_travel_time, ticket.travel_time);
+    string travel_time = s_to_dhm(ticket.travel_time), arrival_time = unix_to_datetime(time(nullptr) + ticket.travel_time);
 
-    db_exec_station_name(
-        ticket.stations, route_db,
-        "SELECT name\
-        FROM station\
-        WHERE direction_name = ? AND id <= ?\
-        ORDER BY id DESC;",
-        2, c_direction_name, c_dest_station_id
-    );
+    db_get_stations(ticket.stations, direction_name, dest_station_id);
 
-    ticket_print(ticket.passenger.full_name, "ФИО");
-    ticket_print(ticket.passenger.id_card, "Серия и номер паспорта");
-    ticket_print(ticket.train_seat.train_type, "Тип поезда");
-    ticket_print(ticket.train_seat.railroad_car_type, "Тип пассажирского места");
-    ticket_print(ticket.distance, "Расстояние, км");
-    ticket_print(ticket.cost, "Стоимость, руб");
-    ticket_print(departure_time, "Время отравления");
-    ticket_print(arrival_time, "Время прибытия");
-    ticket_print(formatted_travel_time, "Время в пути");
-    ticket_print_stations(ticket.stations);
+    ui_print(ticket.passenger.full_name, "ФИО");
+    ui_print(ticket.passenger.id_card, "Серия и номер паспорта");
+    ui_print(ticket.train_seat.train_type, "Тип поезда");
+    ui_print(ticket.train_seat.railroad_car_type, "Тип пассажирского места");
+    ui_print(ticket.distance, "Расстояние, км");
+    ui_print(ticket.cost, "Стоимость, руб");
+    ui_print(departure_date, "Время отравления");
+    ui_print(arrival_time, "Время прибытия");
+    ui_print(travel_time, "Время в пути");
+    ui_print_stations(ticket.stations);
 
     sqlite3_close(route_db);
 

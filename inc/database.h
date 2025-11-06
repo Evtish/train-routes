@@ -1,22 +1,29 @@
 #pragma once
 
 #include <sqlite3.h>
+#include <cstring>
 #include <cstdarg>
 #include <cstdio>
+
 #include <string>
 #include <vector>
+#include <iostream>
 
 #include "ticket.h"
+
+#define DB_RES_BUFFER_SIZE 128
 
 using namespace std;
 
 extern sqlite3 *route_db;
 
-// void escape_quotes(wstring &s);
-void db_exec_station_name(string &res, sqlite3 * &db, const char *query, const char *station_name);
-void db_exec_station_name(vector<string> &res, sqlite3 * &db, const char *query, const int amount_of_binds, ...);
-void db_exec_station_name(vector<vector<string>> &res, sqlite3 * &db, const char *query, const int amount_of_binds, ...);
-// void db_print_error(const char *errmsg);
-// int db_print_stmt(void *, int, char **stmt_res, char **);
-// int db_assign_to_str(void *p_str, int, char **stmt_res, char **);
-// int db_assign_to_vec(void *p_vec, int, char **stmt_res, char **);
+void db_open(const char * filename, sqlite3 * &db);
+void db_exec(char *res, sqlite3 * &db, const char *query, const char *station_name);
+void db_exec(vector<string> &res, sqlite3 * &db, const char *query, const int amount_of_binds, ...);
+void db_exec(vector<vector<string>> &res, sqlite3 * &db, const char *query, const int amount_of_binds, ...);
+
+void db_get_station_id(char *station_id, const char *station_name);
+void db_get_direction_name(char *direction_name, const char *station_id);
+void db_get_schedule_records(vector<vector<string>> &schedule_record, const char *direction_name, const char *station_id);
+void db_get_distance(unsigned &dist, const char *station_id);
+void db_get_stations(vector<string> &stations, const char *direction_name, const char *station_id);

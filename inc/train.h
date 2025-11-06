@@ -17,10 +17,10 @@ using namespace std;
 //     CAR_SLEEPER
 // } RailroadCarType;
 
-typedef struct {
-    string train_type;
-    string railroad_car_type;
-} TrainSeat;
+// struct TrainSeat {
+//     string train_type;
+//     string railroad_car_type;
+// };
 
 typedef map<string, double> map_ratio;
 

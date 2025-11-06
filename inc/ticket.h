@@ -1,25 +1,44 @@
 #pragma once
 
-#include <iostream>
+#include <string>
 #include <vector>
 
-#include "passenger.h"
-#include "train.h"
+// #include "train.h"
 
 using namespace std;
 
-typedef struct {
-    Passenger passenger;
+enum TrainType {
+    TRAIN_STANDARD,
+    TRAIN_EXPRESS,
+    TRAIN_LONG_DISTANCE
+};
+
+enum RailroadCarType {
+    CAR_STANDARD,
+    CAR_PLACARD,
+    CAR_COUPE,
+    CAR_SLEEPER
+};
+
+struct Passenger {
+    string full_name;
+    string id_card;
+};
+
+struct Departure {
+    string term_station_name;
+    time_t departure_datetime; // unix time
+    TrainType train_type;
+    unsigned id;
+};
+
+struct Ticket {
     vector<string> stations;
-    TrainSeat train_seat;
+    Passenger passenger;
+    Departure departure;
     unsigned distance; // in km
     double cost; // in rubles
+    time_t arrival_time; // in seconds
     time_t travel_time; // in seconds
-} Ticket;
-
-void ticket_input(string &val, const string &message);
-void ticket_choose_option(unsigned &index, const vector<string> &options, const string &message);
-void ticket_choose_option(unsigned &index, const vector<vector<string>> &options, const string &message);
-void ticket_print(const string &val, const string &message);
-void ticket_print(const double &val, const string &message);
-void ticket_print_stations(const vector<string> &reversed_stations);
+    RailroadCarType railroad_car_type;
+};
