@@ -17,15 +17,7 @@ time_t date_to_unix(const char *timestamp) {
     else
         return 0;
 }
-// time_t datetime_to_unix(const char *timestamp) {
-//     struct tm tm;
-//     if (strptime(timestamp, "%d.%m.%Y %H:%M:%S", &tm) != NULL)
-//         return mktime(&tm);
-//     else
-//         return 0;
-// }
 
-// seconds to days, hours and minutes
 string s_to_dhm(const time_t seconds) {
     char dhm[DHM_TIME_SIZE];
     const time_t s_in_min = 60, s_in_h = 3600, s_in_day = 86400;
@@ -40,6 +32,6 @@ string s_to_dhm(const time_t seconds) {
     if (hours == 60)
         days++, hours = 0;
     
-    sprintf(dhm, "%ld дн %ld ч %ld мин", days, hours, minutes);
+    sprintf(dhm, "%lu д %lu ч %lu мин", days, hours, minutes);
     return string(dhm);
 }

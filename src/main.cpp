@@ -2,10 +2,8 @@
 #include <vector>
 #include <ctime>
 
-#include "station.h"
 #include "ticket.h"
 #include "datetime.h"
-#include "train.h"
 #include "ui.h"
 #include "database.h"
 
@@ -16,25 +14,15 @@ int main(void) {
 
     db_open("route.db", route_db);
 
-    // vector<vector<string>> tmp;
-    // db_exec(
-    //     tmp, route_db,
-    //     "SELECT hours, minutes\
-    //     FROM schedule",
-    //     0
-    // );
-    // for (auto &hm : tmp) {
-    //     time_t h = stoul(hm[0]), m = stoul(hm[1]);
-    //     cout << h * 3600 + m * 60 << "\n";
-    // }
-
     Ticket ticket;
 
-    string departure_date = ui_input("Дата отправления (дд.мм.гггг)");
-    // time_t unix_departure_date = date_to_unix(departure_date.c_str());
-    // const char *c_departure_date = departure_date.c_str();
+    ui_input(ticket.passenger.full_name, "ФИО");
 
-    string dest_station_name = ui_input("Куда");
+    string departure_date;
+    ui_input(departure_date, "Дата отправления (дд.мм.гггг)");
+
+    string dest_station_name;
+    ui_input(dest_station_name, "Куда");
 
     char dest_station_id[DB_RES_BUFFER_SIZE] = "\0";
     db_get_station_id(dest_station_id, dest_station_name.c_str());
@@ -62,38 +50,29 @@ int main(void) {
         }
     }
 
-    unsigned departure_idx = ui_choose_option(departures, "Выберите отправление");
-    Departure departure = departures[departure_idx];
+    unsigned departure_idx = ui_choose_option(departures, "Отправление");
+    ticket.departure = departures[departure_idx];
 
-    
-    if (departure.train_type == TRAIN_LONG_DISTANCE) {
-
-    }
+    ticket.railroad_car_type = CAR_STANDARD;
+    if (ticket.departure.train_type == TRAIN_LONG_DISTANCE)
+        ticket.railroad_car_type = static_cast<RailroadCarType>(ui_choose_option(ld_railroad_car_names, "Тип пассажирского места") + 1);
     
     ticket.distance = 0;
     db_get_distance(ticket.distance, dest_station_id);
-    ticket.cost = ticket.distance * rub_per_km;
-    ticket.travel_time = ticket.distance / km_per_second;
 
-    ticket.passenger.full_name = ui_input("ФИО");
-    ticket.passenger.id_card = ui_input("Серия и номер паспорта (слитно)");
-    // ui_choose_option(ticket.train_seat.train_type, ticket.cost, train_ratio, "Тип поезда");
-    // ui_choose_option(ticket.train_seat.railroad_car_type, ticket.cost, railroad_car_ratio, "Тип пассажирского места");
+    ticket.cost = ticket.distance * rub_per_km * train_cost_ratio.at(ticket.departure.train_type) * railroad_car_cost_ratio.at(ticket.railroad_car_type);
+    ticket.travel_datetime = ticket.distance / km_per_second / train_speed_ratio.at(ticket.departure.train_type);
 
-    string travel_time = s_to_dhm(ticket.travel_time), arrival_time = unix_to_datetime(time(nullptr) + ticket.travel_time);
+    // TODO: fix
+    cout << "Серия и номер паспорта (слитно): ";
+    cin >> ticket.passenger.id_card;
+    delete_above_lines(1);
+    // ui_input(ticket.passenger.id_card, "Серия и номер паспорта (слитно)");
 
-    db_get_stations(ticket.stations, direction_name, dest_station_id);
+    char c_train_type[2] = { static_cast<char>(ticket.departure.train_type + '0'), '\0' };
+    db_get_stations(ticket.stations, direction_name, dest_station_id, c_train_type);
 
-    ui_print(ticket.passenger.full_name, "ФИО");
-    ui_print(ticket.passenger.id_card, "Серия и номер паспорта");
-    ui_print(ticket.train_seat.train_type, "Тип поезда");
-    ui_print(ticket.train_seat.railroad_car_type, "Тип пассажирского места");
-    ui_print(ticket.distance, "Расстояние, км");
-    ui_print(ticket.cost, "Стоимость, руб");
-    ui_print(departure_date, "Время отравления");
-    ui_print(arrival_time, "Время прибытия");
-    ui_print(travel_time, "Время в пути");
-    ui_print_stations(ticket.stations);
+    ui_print_ticket(ticket);
 
     sqlite3_close(route_db);
 

@@ -2,8 +2,7 @@
 
 #include <string>
 #include <vector>
-
-// #include "train.h"
+#include <unordered_map>
 
 using namespace std;
 
@@ -38,7 +37,18 @@ struct Ticket {
     Departure departure;
     unsigned distance; // in km
     double cost; // in rubles
-    time_t arrival_time; // in seconds
-    time_t travel_time; // in seconds
+    time_t travel_datetime; // in seconds
     RailroadCarType railroad_car_type;
 };
+
+extern const double rub_per_km, km_per_second;
+
+extern const vector<string> ld_railroad_car_names;
+
+extern const unordered_map<TrainType, string> train_name_ratio;
+extern const unordered_map<RailroadCarType, string> railroad_car_name_ratio;
+
+extern const unordered_map<TrainType, double> train_speed_ratio;
+
+extern const unordered_map<TrainType, double> train_cost_ratio;
+extern const unordered_map<RailroadCarType, double> railroad_car_cost_ratio;
