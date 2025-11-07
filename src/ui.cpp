@@ -37,25 +37,6 @@ unsigned ui_choose_option(const std::vector<std::wstring> &options, const std::w
 
     return index;
 }
-// unsigned ui_choose_option(const std::vector<Departure> &options, const std::wstring &message) {
-//     std::wstring s;
-//     size_t amount_of_options = options.size();
-
-//     std::wcout << L"   отправление       конечная          тип поезда\n";
-//     for (size_t i = 0; i < amount_of_options; i++) {
-//         Departure dep = options[i];
-//         std::wcout << i + 1 << L". " << unix_to_datetime(dep.departure_datetime) << L" " << dep.term_station_name << L"      " << train_name_ratio.at(dep.train_type) << "\n";
-//     }
-//     std::wcout << message << L": ";
-//     std::getline(std::wcin, s);
-
-//     unsigned index = stoi(s) - 1;
-
-//     delete_above_lines(amount_of_options + 2);
-
-//     return index;
-// }
-
 unsigned ui_choose_option(const std::vector<Departure> &deps, const std::wstring &message) {
     std::wstring s;
     const size_t amount_of_deps = deps.size();
