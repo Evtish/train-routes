@@ -1,3 +1,7 @@
+#ifdef _WIN32
+#include <cstdlib>
+#endif
+
 #include <iostream>
 #include <vector>
 
@@ -7,23 +11,25 @@
 #include "database.h"
 #include "encoding.h"
 
-// using namespace std;
-
 int main(void) {
-    setlocale(LC_ALL, "en_US.utf8");
+    #ifdef _WIN32
+    setlocale(LC_ALL, "Russian");
+    system("chcp 1251 >NUL"); // https://stackoverflow.com/questions/14686330/how-do-i-make-a-windows-batch-script-completely-silent
+    #else
+    setlocale(LC_ALL, "");
+    #endif
 
     db_open("route.db", route_db);
 
     Ticket ticket;
 
-    std::wstring w_dest_station_name;
-    ui_input(w_dest_station_name, L"Куда");
-    std::string dest_station_name = wstring_to_string(w_dest_station_name);
+    std::wstring w_dest_station_name = ui_input(L"Куда");
+    std::string dest_station_name = enc_wstring_to_string(w_dest_station_name);
 
     char dest_station_id[DB_RES_SIZE] = "\0";
     db_get_station_id(dest_station_id, dest_station_name.c_str());
-    if (dest_station_id[0] == '\0') {
-        std::wcerr << L"Станция не найдена" << std::endl;
+    if (dest_station_id[0] == '\0') {// || dest_station_id == dep_station_id.c_str()) {
+        std::wcerr << L"Станция не найдена или маршрут невозможен" << std::endl;
         exit(1);
     }
 
@@ -33,9 +39,8 @@ int main(void) {
     std::vector<std::vector<std::wstring>> schedule_records;
     db_get_schedule_records(schedule_records, direction_name, dest_station_id);
 
-    std::wstring w_departure_date;
-    ui_input(w_departure_date, L"Дата отправления (дд.мм.гггг)");
-    std::string departure_date = wstring_to_string(w_departure_date);
+    std::wstring w_departure_date = ui_input(L"Дата отправления (дд.мм.гггг)");
+    std::string departure_date = enc_wstring_to_string(w_departure_date);
     
     // TODO: make choosing on-going, wo/ creating the departures vector
     std::vector<Departure> departures;
@@ -51,7 +56,7 @@ int main(void) {
         }
     }
 
-    unsigned departure_idx = ui_choose_option(departures, L"Отправление");
+    unsigned departure_idx = ui_choose_option(departures, L"Номер отправления");
     ticket.departure = departures[departure_idx];
 
     ticket.railroad_car_type = CAR_STANDARD;
@@ -64,8 +69,8 @@ int main(void) {
     ticket.cost = ticket.distance * rub_per_km * train_cost_ratio.at(ticket.departure.train_type) * railroad_car_cost_ratio.at(ticket.railroad_car_type);
     ticket.travel_datetime = ticket.distance / km_per_second / train_speed_ratio.at(ticket.departure.train_type);
 
-    ui_input(ticket.passenger.full_name, L"ФИО");
-    ui_input(ticket.passenger.id_card, L"Серия и номер паспорта (слитно)");
+    ticket.passenger.full_name = ui_input(L"ФИО");
+    ticket.passenger.id_card = ui_input(L"Серия и номер паспорта (слитно)");
 
     db_get_stations(ticket.stations, direction_name, dest_station_id, std::to_string(ticket.departure.train_type == TRAIN_STANDARD).c_str());
 

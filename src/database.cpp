@@ -40,7 +40,7 @@ void db_exec(std::vector<std::wstring> &res, sqlite3 * &db, const char *query, c
     va_end(text_bind);
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
-        res.push_back(char_to_wstring(reinterpret_cast<const char *>(sqlite3_column_text(stmt, 0))));
+        res.push_back(enc_char_to_wstring(reinterpret_cast<const char *>(sqlite3_column_text(stmt, 0))));
     }
 
     sqlite3_finalize(stmt);
@@ -64,7 +64,7 @@ void db_exec(std::vector<std::vector<std::wstring>> &res, sqlite3 * &db, const c
         res.push_back({});
         for (int i = 0; i < col_count; i++) {
             std::vector<std::wstring> &line = res.back();
-            line.push_back(char_to_wstring(reinterpret_cast<const char *>(sqlite3_column_text(stmt, i))));
+            line.push_back(enc_char_to_wstring(reinterpret_cast<const char *>(sqlite3_column_text(stmt, i))));
         }
     }
 

@@ -4,7 +4,7 @@
 #include <vector>
 #include <unordered_map>
 
-// using namespace std;
+#include "encoding.h"
 
 enum TrainType {
     TRAIN_STANDARD,
@@ -41,6 +41,7 @@ struct Ticket {
     RailroadCarType railroad_car_type;
 };
 
+// extern const std::string dep_station_id;
 extern const double rub_per_km, km_per_second;
 
 extern const std::vector<std::wstring> ld_railroad_car_names;

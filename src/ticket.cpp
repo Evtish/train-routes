@@ -1,5 +1,6 @@
 #include "ticket.h"
 
+// const std::string dep_station_id = "1";
 const double
     rub_per_km = 4, // in rubles
     km_per_second = 16.67e-3; // 60 km/h

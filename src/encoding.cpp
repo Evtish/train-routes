@@ -1,32 +1,23 @@
 #include "encoding.h"
 
 // https://stackoverflow.com/questions/3074776/how-to-convert-char-array-to-wchar-t-array
-// wstring char_to_wstring(const char *text) {
-//     const size_t size = strlen(text);
-//     wstring wstr;
-//     if (size > 0) {
-//         wstr.resize(size);
-//         mbstowcs(&wstr[0], text, size);
-//     }
-//     return wstr;
-// }
-
-std::wstring char_to_wstring(const char* text) {
+std::wstring enc_char_to_wstring(const char* text) {
     if (!text) return L"";
 
 #ifdef _WIN32
     int size_needed = MultiByteToWideChar(CP_UTF8, 0, text, -1, nullptr, 0);
     if (size_needed == 0) {
-        throw runtime_error("MultiByteToWideChar failed");
+        std::wcerr << L"Ошибка при выполнении функции MultiByteToWideChar" << std::endl;
+        exit(1);
     }
 
-    wstring wstr(size_needed - 1, L'\0');
+    std::wstring wstr(size_needed - 1, L'\0');
     MultiByteToWideChar(CP_UTF8, 0, text, -1, &wstr[0], size_needed);
     return wstr;
 
 #else
-    if (!setlocale(LC_CTYPE, "en_US.utf8") &&
-        !setlocale(LC_CTYPE, "ru_RU.utf8")) {
+    if (!setlocale(LC_ALL, "ru_RU.utf8") &&
+        !setlocale(LC_ALL, "en_US.utf8")) {
         std::wcerr << L"UTF-8 локаль не найдена" << std::endl;
         exit(1);
     }
@@ -43,17 +34,10 @@ std::wstring char_to_wstring(const char* text) {
 #endif
 }
 
-// std::wstring string_to_wstring(const char* str)
-// {
-//     if (!str) return L"";
-//     std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
-//     return conv.from_bytes(str);
-// }
-
-std::string wstring_to_string(const std::wstring& wstr) {
+std::string enc_wstring_to_string(const std::wstring& wstr) {
 #ifdef _WIN32
     int size_needed = WideCharToMultiByte(CP_UTF8, 0, wstr.data(), (int) wstr.size(), nullptr, 0, nullptr, nullptr);
-    string str(size_needed, 0);
+    std::string str(size_needed, 0);
     WideCharToMultiByte(CP_UTF8, 0, wstr.data(), (int) wstr.size(), &str[0], size_needed, nullptr, nullptr);
     return str;
 #else

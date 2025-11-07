@@ -12,8 +12,6 @@
 
 #define DB_RES_SIZE 128
 
-// using namespace std;
-
 extern sqlite3 *route_db;
 
 void db_open(const char * filename, sqlite3 * &db);

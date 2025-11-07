@@ -11,7 +11,5 @@
 #include <string>
 #include <iostream>
 
-// using namespace std;
-
-std::wstring char_to_wstring(const char *text);
-std::string wstring_to_string(const std::wstring& wstr);
+std::wstring enc_char_to_wstring(const char *text);
+std::string enc_wstring_to_string(const std::wstring& wstr);

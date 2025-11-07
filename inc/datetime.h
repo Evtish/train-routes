@@ -1,15 +1,12 @@
 #pragma once
 
 #include <ctime>
-#include <cmath>
 #include <cstdio>
 
 #include <iostream>
 #include <string>
 
 #include "encoding.h"
-
-// using namespace std;
 
 extern const time_t datetime_offset;
 
