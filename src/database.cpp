@@ -96,8 +96,8 @@ void db_get_schedule_records(std::vector<std::vector<std::wstring>> &schedule_re
         schedule_record, route_db,
         "SELECT id, unix_time, term_station_name, train_type\
         FROM schedule\
-        WHERE direction_name = ? AND term_station_id >= ?;",
-        2, direction_name, station_id
+        WHERE direction_name = ? AND term_station_id >= ? AND (train_type = 0 OR (SELECT standard_train_only FROM station WHERE id = ?) = 0);",
+        3, direction_name, station_id, station_id
     );
 }
 
