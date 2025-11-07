@@ -1,12 +1,12 @@
 #include "ui.h"
 
 void delete_above_lines(unsigned n) {
-    wcout << "\x1B[" << n << "A\x1B[0J\r"; // moves cursor up n lines, erase from cursor until end of screen, return the carriage
+    std::wcout << "\x1B[" << n << "A\x1B[0J\r"; // moves cursor up n lines, erase from cursor until end of screen, return the carriage
 }
 
-void ui_input(wstring &s, const wstring &message) {
-    wcout << message << L": ";
-    getline(wcin, s);
+void ui_input(std::wstring &s, const std::wstring &message) {
+    std::wcout << message << L": ";
+    std::getline(std::wcin, s);
     delete_above_lines(1);
 }
 // void ui_input(char *s, const int &size_limit, const wstring &message) {
@@ -15,14 +15,14 @@ void ui_input(wstring &s, const wstring &message) {
 //     delete_above_lines(1);
 // }
 
-unsigned ui_choose_option(const vector<wstring> &options, const wstring &message) {
-    wstring s;
+unsigned ui_choose_option(const std::vector<std::wstring> &options, const std::wstring &message) {
+    std::wstring s;
     size_t amount_of_options = options.size();
 
     for (size_t i = 0; i < amount_of_options; i++)
-        wcout << i + 1 << L". " << options[i] << "\n";
-    wcout << message << L": ";
-    getline(wcin, s);
+        std::wcout << i + 1 << L". " << options[i] << "\n";
+    std::wcout << message << L": ";
+    std::getline(std::wcin, s);
 
     unsigned index = stoi(s) - 1;
 
@@ -30,17 +30,17 @@ unsigned ui_choose_option(const vector<wstring> &options, const wstring &message
 
     return index;
 }
-unsigned ui_choose_option(const vector<Departure> &options, const wstring &message) {
-    wstring s;
+unsigned ui_choose_option(const std::vector<Departure> &options, const std::wstring &message) {
+    std::wstring s;
     size_t amount_of_options = options.size();
 
-    wcout << L"   отправление       конечная          тип поезда\n";
+    std::wcout << L"   отправление       конечная          тип поезда\n";
     for (size_t i = 0; i < amount_of_options; i++) {
         Departure dep = options[i];
-        wcout << i + 1 << L". " << unix_to_datetime(dep.departure_datetime) << L" " << dep.term_station_name << L"      " << train_name_ratio.at(dep.train_type) << "\n";
+        std::wcout << i + 1 << L". " << unix_to_datetime(dep.departure_datetime) << L" " << dep.term_station_name << L"      " << train_name_ratio.at(dep.train_type) << "\n";
     }
-    wcout << message << L": ";
-    getline(wcin, s);
+    std::wcout << message << L": ";
+    std::getline(std::wcin, s);
 
     unsigned index = stoi(s) - 1;
 
@@ -49,24 +49,24 @@ unsigned ui_choose_option(const vector<Departure> &options, const wstring &messa
     return index;
 }
 
-void ui_print(const wstring &s, const wstring &message) {
-    wcout << message << L": " << s << "\n";
+void ui_print(const std::wstring &s, const std::wstring &message) {
+    std::wcout << message << L": " << s << "\n";
 }
-void ui_print(const double &s, const wstring &message) {
-    wcout << message << L": " << s << "\n";
+void ui_print(const double &s, const std::wstring &message) {
+    std::wcout << message << L": " << s << "\n";
 }
 
-void ui_print_stations(const vector<wstring> &stations) {
-    wcout << L"Станции:\n";
-    for (const wstring &station : stations) {
-        wcout << L"- " << station << "\n";
+void ui_print_stations(const std::vector<std::wstring> &stations) {
+    std::wcout << L"Станции:\n";
+    for (const std::wstring &station : stations) {
+        std::wcout << L"- " << station << "\n";
     }
 }
 
 void ui_print_ticket(const Ticket &ticket) {
-    wstring unix_departure_datetime = unix_to_datetime(ticket.departure.departure_datetime);
-    wstring unix_travel_datetime = s_to_dhm(ticket.travel_datetime);
-    wstring unix_arrival_datetime = unix_to_datetime(ticket.departure.departure_datetime + ticket.travel_datetime);
+    std::wstring unix_departure_datetime = unix_to_datetime(ticket.departure.departure_datetime);
+    std::wstring unix_travel_datetime = s_to_dhm(ticket.travel_datetime);
+    std::wstring unix_arrival_datetime = unix_to_datetime(ticket.departure.departure_datetime + ticket.travel_datetime);
     
     ui_print(ticket.passenger.full_name, L"ФИО");
     ui_print(ticket.passenger.id_card, L"Серия и номер паспорта");

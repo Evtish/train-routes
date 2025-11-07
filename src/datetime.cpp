@@ -5,7 +5,7 @@
 
 const time_t datetime_offset = 60; // 1 minute
 
-wstring unix_to_datetime(const time_t &unix_time) {
+std::wstring unix_to_datetime(const time_t &unix_time) {
     char datetime[DATETIME_SIZE];
     tm *tmp = localtime(&unix_time);
     strftime(datetime, DATETIME_SIZE, "%d %b %Y %H:%M", tmp);
@@ -32,14 +32,14 @@ time_t date_to_unix(const char *timestamp) {
     if (strptime(timestamp, "%d.%m.%Y", &tm) != NULL)
         return mktime(&tm);
     else {
-        wcerr << L"Неверный формат даты" << endl;
+        std::wcerr << L"Неверный формат даты" << std::endl;
         exit(1);
     }
     #endif
 }
 
 // seconds to days, hours and minutes
-wstring s_to_dhm(const time_t seconds) {
+std::wstring s_to_dhm(const time_t seconds) {
     char dhm[DHM_TIME_SIZE];
     const time_t s_in_min = 60, s_in_h = 3600, s_in_day = 86400;
     time_t days, hours, minutes, seconds_cpy = seconds;

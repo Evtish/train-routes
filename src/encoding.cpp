@@ -11,7 +11,7 @@
 //     return wstr;
 // }
 
-wstring char_to_wstring(const char* text) {
+std::wstring char_to_wstring(const char* text) {
     if (!text) return L"";
 
 #ifdef _WIN32
@@ -27,17 +27,17 @@ wstring char_to_wstring(const char* text) {
 #else
     if (!setlocale(LC_CTYPE, "en_US.utf8") &&
         !setlocale(LC_CTYPE, "ru_RU.utf8")) {
-        wcerr << L"UTF-8 локаль не найдена" << endl;
+        std::wcerr << L"UTF-8 локаль не найдена" << std::endl;
         exit(1);
     }
 
     size_t needed = mbstowcs(nullptr, text, 0);
     if (needed == static_cast<size_t>(-1)) {
-        wcerr << L"Некорректная последовательность UTF-8" << endl;
+        std::wcerr << L"Некорректная последовательность UTF-8" << std::endl;
         exit(1);
     }
 
-    wstring wstr(needed, L'\0');
+    std::wstring wstr(needed, L'\0');
     mbstowcs(&wstr[0], text, needed);
     return wstr;
 #endif
@@ -50,7 +50,7 @@ wstring char_to_wstring(const char* text) {
 //     return conv.from_bytes(str);
 // }
 
-string wstring_to_string(const wstring& wstr) {
+std::string wstring_to_string(const std::wstring& wstr) {
 #ifdef _WIN32
     int size_needed = WideCharToMultiByte(CP_UTF8, 0, wstr.data(), (int) wstr.size(), nullptr, 0, nullptr, nullptr);
     string str(size_needed, 0);
@@ -58,7 +58,7 @@ string wstring_to_string(const wstring& wstr) {
     return str;
 #else
     size_t len = wcstombs(nullptr, wstr.c_str(), 0);
-    string str(len, 0);
+    std::string str(len, 0);
     wcstombs(&str[0], wstr.c_str(), len);
     return str;
 #endif

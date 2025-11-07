@@ -4,7 +4,7 @@
 #include <vector>
 #include <unordered_map>
 
-using namespace std;
+// using namespace std;
 
 enum TrainType {
     TRAIN_STANDARD,
@@ -20,19 +20,19 @@ enum RailroadCarType {
 };
 
 struct Passenger {
-    wstring full_name;
-    wstring id_card;
+    std::wstring full_name;
+    std::wstring id_card;
 };
 
 struct Departure {
-    wstring term_station_name;
+    std::wstring term_station_name;
     time_t departure_datetime; // unix time
     TrainType train_type;
     unsigned id;
 };
 
 struct Ticket {
-    vector<wstring> stations;
+    std::vector<std::wstring> stations;
     Passenger passenger;
     Departure departure;
     double cost; // in rubles
@@ -43,12 +43,12 @@ struct Ticket {
 
 extern const double rub_per_km, km_per_second;
 
-extern const vector<wstring> ld_railroad_car_names;
+extern const std::vector<std::wstring> ld_railroad_car_names;
 
-extern const unordered_map<TrainType, wstring> train_name_ratio;
-extern const unordered_map<RailroadCarType, wstring> railroad_car_name_ratio;
+extern const std::unordered_map<TrainType, std::wstring> train_name_ratio;
+extern const std::unordered_map<RailroadCarType, std::wstring> railroad_car_name_ratio;
 
-extern const unordered_map<TrainType, double> train_speed_ratio;
+extern const std::unordered_map<TrainType, double> train_speed_ratio;
 
-extern const unordered_map<TrainType, double> train_cost_ratio;
-extern const unordered_map<RailroadCarType, double> railroad_car_cost_ratio;
+extern const std::unordered_map<TrainType, double> train_cost_ratio;
+extern const std::unordered_map<RailroadCarType, double> railroad_car_cost_ratio;

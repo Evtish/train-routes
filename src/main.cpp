@@ -7,7 +7,7 @@
 #include "database.h"
 #include "encoding.h"
 
-using namespace std;
+// using namespace std;
 
 int main(void) {
     setlocale(LC_ALL, "en_US.utf8");
@@ -16,30 +16,30 @@ int main(void) {
 
     Ticket ticket;
 
-    wstring w_dest_station_name;
+    std::wstring w_dest_station_name;
     ui_input(w_dest_station_name, L"Куда");
-    string dest_station_name = wstring_to_string(w_dest_station_name);
+    std::string dest_station_name = wstring_to_string(w_dest_station_name);
 
     char dest_station_id[DB_RES_SIZE] = "\0";
     db_get_station_id(dest_station_id, dest_station_name.c_str());
     if (dest_station_id[0] == '\0') {
-        wcerr << L"Станция не найдена" << endl;
+        std::wcerr << L"Станция не найдена" << std::endl;
         exit(1);
     }
 
     char direction_name[DB_RES_SIZE];
     db_get_direction_name(direction_name, dest_station_id);
     
-    vector<vector<wstring>> schedule_records;
+    std::vector<std::vector<std::wstring>> schedule_records;
     db_get_schedule_records(schedule_records, direction_name, dest_station_id);
 
-    wstring w_departure_date;
+    std::wstring w_departure_date;
     ui_input(w_departure_date, L"Дата отправления (дд.мм.гггг)");
-    string departure_date = wstring_to_string(w_departure_date);
+    std::string departure_date = wstring_to_string(w_departure_date);
     
     // TODO: make choosing on-going, wo/ creating the departures vector
-    vector<Departure> departures;
-    for (vector<wstring> &rec : schedule_records) {
+    std::vector<Departure> departures;
+    for (std::vector<std::wstring> &rec : schedule_records) {
         time_t departure_datetime = date_to_unix(departure_date.c_str()) + stol(rec[1]);
         if (departure_datetime - time(nullptr) >= datetime_offset) {
             departures.push_back(Departure{
@@ -67,7 +67,7 @@ int main(void) {
     ui_input(ticket.passenger.full_name, L"ФИО");
     ui_input(ticket.passenger.id_card, L"Серия и номер паспорта (слитно)");
 
-    db_get_stations(ticket.stations, direction_name, dest_station_id, to_string(ticket.departure.train_type == TRAIN_STANDARD).c_str());
+    db_get_stations(ticket.stations, direction_name, dest_station_id, std::to_string(ticket.departure.train_type == TRAIN_STANDARD).c_str());
 
     ui_print_ticket(ticket);
 
