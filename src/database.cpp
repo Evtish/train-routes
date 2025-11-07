@@ -1,4 +1,4 @@
-цццццццццццццццццццццццццццццццц#include "database.h"
+#include "database.h"
 
 sqlite3 *route_db;
 
