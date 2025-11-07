@@ -4,7 +4,7 @@ sqlite3 *route_db;
 
 void db_open(const char * filename, sqlite3 * &p_db) {
     if (sqlite3_open(filename, &p_db) != SQLITE_OK) {
-        cerr << "Ошибка при открытии БД: " << sqlite3_errmsg(p_db) << endl;
+        wcerr << L"Ошибка при открытии БД: " << sqlite3_errmsg(p_db) << endl;
         sqlite3_close(p_db);
         exit(1);
     }
@@ -13,7 +13,7 @@ void db_open(const char * filename, sqlite3 * &p_db) {
 void db_exec(char *res, sqlite3 * &db, const char *query, const char *station_name) {
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, query, -1, &stmt, nullptr) != SQLITE_OK) {
-        cerr << "Ошибка подготовки запроса: " << sqlite3_errmsg(db) << endl;
+        wcerr << L"Ошибка подготовки запроса: " << sqlite3_errmsg(db) << endl;
         sqlite3_close(db);
         exit(1);
     }
@@ -25,10 +25,10 @@ void db_exec(char *res, sqlite3 * &db, const char *query, const char *station_na
 
     sqlite3_finalize(stmt);
 }
-void db_exec(vector<string> &res, sqlite3 * &db, const char *query, const int amount_of_binds, ...) {
+void db_exec(vector<wstring> &res, sqlite3 * &db, const char *query, const int amount_of_binds, ...) {
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, query, -1, &stmt, nullptr) != SQLITE_OK) {
-        cerr << "Ошибка подготовки запроса: " << sqlite3_errmsg(db) << endl;
+        wcerr << L"Ошибка подготовки запроса: " << sqlite3_errmsg(db) << endl;
         sqlite3_close(db);
         exit(1);
     }
@@ -40,15 +40,15 @@ void db_exec(vector<string> &res, sqlite3 * &db, const char *query, const int am
     va_end(text_bind);
 
     while (sqlite3_step(stmt) == SQLITE_ROW) {
-        res.push_back(reinterpret_cast<const char *>(sqlite3_column_text(stmt, 0)));
+        res.push_back(char_to_wstring(reinterpret_cast<const char *>(sqlite3_column_text(stmt, 0))));
     }
 
     sqlite3_finalize(stmt);
 }
-void db_exec(vector<vector<string>> &res, sqlite3 * &db, const char *query, const int amount_of_binds, ...) {
+void db_exec(vector<vector<wstring>> &res, sqlite3 * &db, const char *query, const int amount_of_binds, ...) {
     sqlite3_stmt *stmt;
     if (sqlite3_prepare_v2(db, query, -1, &stmt, nullptr) != SQLITE_OK) {
-        cerr << "Ошибка подготовки запроса: " << sqlite3_errmsg(db) << endl;
+        wcerr << L"Ошибка подготовки запроса: " << sqlite3_errmsg(db) << endl;
         sqlite3_close(db);
         exit(1);
     }
@@ -63,8 +63,8 @@ void db_exec(vector<vector<string>> &res, sqlite3 * &db, const char *query, cons
         int col_count = sqlite3_column_count(stmt);
         res.push_back({});
         for (int i = 0; i < col_count; i++) {
-            vector<string> &line = res.back();
-            line.push_back(reinterpret_cast<const char *>(sqlite3_column_text(stmt, i)));
+            vector<wstring> &line = res.back();
+            line.push_back(char_to_wstring(reinterpret_cast<const char *>(sqlite3_column_text(stmt, i))));
         }
     }
 
@@ -91,7 +91,7 @@ void db_get_direction_name(char *direction_name, const char *station_id) {
     );
 }
 
-void db_get_schedule_records(vector<vector<string>> &schedule_record, const char *direction_name, const char *station_id) {
+void db_get_schedule_records(vector<vector<wstring>> &schedule_record, const char *direction_name, const char *station_id) {
     db_exec(
         schedule_record, route_db,
         "SELECT id, unix_time, term_station_name, train_type\
@@ -113,7 +113,7 @@ void db_get_distance(unsigned &dist, const char *station_id) {
     dist = stoi(query_res);
 }
 
-void db_get_stations(vector<string> &stations, const char *direction_name, const char *station_id, const char *train_type) {
+void db_get_stations(vector<wstring> &stations, const char *direction_name, const char *station_id, const char *train_type) {
     db_exec(
         stations, route_db,
         "SELECT name\
