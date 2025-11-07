@@ -1,45 +1,50 @@
+#ifdef _WIN32
+#include <cstdlib>
+#endif
+
 #include <iostream>
 #include <vector>
-#include <ctime>
 
 #include "ticket.h"
 #include "datetime.h"
 #include "ui.h"
 #include "database.h"
-
-using namespace std;
+#include "encoding.h"
 
 int main(void) {
+    #ifdef _WIN32
+    setlocale(LC_ALL, "Russian");
+    system("chcp 1251 >NUL"); // https://stackoverflow.com/questions/14686330/how-do-i-make-a-windows-batch-script-completely-silent
+    #else
     setlocale(LC_ALL, "");
+    #endif
 
     db_open("route.db", route_db);
 
     Ticket ticket;
 
-    ui_input(ticket.passenger.full_name, "ФИО");
+    std::wstring w_dest_station_name = ui_input(L"Куда");
+    std::string dest_station_name = enc_wstring_to_string(w_dest_station_name);
 
-    string departure_date;
-    ui_input(departure_date, "Дата отправления (дд.мм.гггг)");
-
-    string dest_station_name;
-    ui_input(dest_station_name, "Куда");
-
-    char dest_station_id[DB_RES_BUFFER_SIZE] = "\0";
+    char dest_station_id[DB_RES_SIZE] = "\0";
     db_get_station_id(dest_station_id, dest_station_name.c_str());
-    if (dest_station_id[0] == '\0') {
-        cerr << "Ошибка: станция не найдена\n" << endl;
+    if (dest_station_id[0] == '\0') {// || dest_station_id == dep_station_id.c_str()) {
+        std::wcerr << L"Станция не найдена или маршрут невозможен" << std::endl;
         exit(1);
     }
 
-    char direction_name[DB_RES_BUFFER_SIZE];
+    char direction_name[DB_RES_SIZE];
     db_get_direction_name(direction_name, dest_station_id);
     
-    vector<vector<string>> schedule_records;
+    std::vector<std::vector<std::wstring>> schedule_records;
     db_get_schedule_records(schedule_records, direction_name, dest_station_id);
+
+    std::wstring w_departure_date = ui_input(L"Дата отправления (дд.мм.гггг)");
+    std::string departure_date = enc_wstring_to_string(w_departure_date);
     
     // TODO: make choosing on-going, wo/ creating the departures vector
-    vector<Departure> departures;
-    for (vector<string> &rec : schedule_records) {
+    std::vector<Departure> departures;
+    for (std::vector<std::wstring> &rec : schedule_records) {
         time_t departure_datetime = date_to_unix(departure_date.c_str()) + stol(rec[1]);
         if (departure_datetime - time(nullptr) >= datetime_offset) {
             departures.push_back(Departure{
@@ -51,12 +56,12 @@ int main(void) {
         }
     }
 
-    unsigned departure_idx = ui_choose_option(departures, "Отправление");
+    unsigned departure_idx = ui_choose_option(departures, L"Номер отправления");
     ticket.departure = departures[departure_idx];
 
     ticket.railroad_car_type = CAR_STANDARD;
     if (ticket.departure.train_type == TRAIN_LONG_DISTANCE)
-        ticket.railroad_car_type = static_cast<RailroadCarType>(ui_choose_option(ld_railroad_car_names, "Тип пассажирского места") + 1);
+        ticket.railroad_car_type = static_cast<RailroadCarType>(ui_choose_option(ld_railroad_car_names, L"Тип пассажирского места") + 1);
     
     ticket.distance = 0;
     db_get_distance(ticket.distance, dest_station_id);
@@ -64,14 +69,10 @@ int main(void) {
     ticket.cost = ticket.distance * rub_per_km * train_cost_ratio.at(ticket.departure.train_type) * railroad_car_cost_ratio.at(ticket.railroad_car_type);
     ticket.travel_datetime = ticket.distance / km_per_second / train_speed_ratio.at(ticket.departure.train_type);
 
-    // TODO: fix
-    cout << "Серия и номер паспорта (слитно): ";
-    cin >> ticket.passenger.id_card;
-    delete_above_lines(1);
-    // ui_input(ticket.passenger.id_card, "Серия и номер паспорта (слитно)");
+    ticket.passenger.full_name = ui_input(L"ФИО");
+    ticket.passenger.id_card = ui_input(L"Серия и номер паспорта (слитно)");
 
-    char c_train_type[2] = { static_cast<char>(ticket.departure.train_type + '0'), '\0' };
-    db_get_stations(ticket.stations, direction_name, dest_station_id, c_train_type);
+    db_get_stations(ticket.stations, direction_name, dest_station_id, std::to_string(ticket.departure.train_type == TRAIN_STANDARD).c_str());
 
     ui_print_ticket(ticket);
 
